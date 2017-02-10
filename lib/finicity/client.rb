@@ -259,6 +259,20 @@ module Finicity
       end
     end
 
+    def get_all_institutions
+      request = ::Finicity::V1::Request::GetAllInstitutions.new(token)
+      institutions = []
+      response = request.get_all_institutions
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        institutions << parsed_response['institutions']
+        return institutions.flatten
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     def get_login_form(institution_id)
       request = ::Finicity::V1::Request::GetLoginForm.new(token, institution_id)
       response = request.get_login_form
