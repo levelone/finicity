@@ -21,11 +21,11 @@ Configuration
 You can configure the finicity gem with the following initializer
 
 ```Ruby
-Finicity::V1.configure do |config|
+Finicity.configure do |config|
   config.base_url = "https://api.finicity.com/aggregation/"
-  config.partner_id = 1
-  config.partner_secret = "1234"
-  config.app_key = "5678"
+  config.partner_id = <partner_id>
+  config.partner_secret = <partner_secret>
+  config.app_key = <app_key>
 end
 ```
 

@@ -228,7 +228,7 @@ module Finicity
       response = request.get_institution
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Institution.parse(response.body)
+        parsed_response = JSON.parse(response.body)
         return parsed_response
       else
         raise_generic_error!(response)
@@ -245,10 +245,10 @@ module Finicity
         response = request.get_institutions(start, limit)
 
         if response.ok?
-          parsed_response = ::Finicity::V1::Response::Institutions.parse(response.body)
-          institutions << parsed_response.institutions
+          parsed_response = JSON.parse(response.body)
+          institutions << parsed_response['institutions']
 
-          if parsed_response.more_available?
+          if parsed_response['moreAvailable']
             start += limit
           else
             return institutions.flatten
@@ -256,6 +256,20 @@ module Finicity
         else
           raise_generic_error!(response)
         end
+      end
+    end
+
+    def get_all_institutions
+      request = ::Finicity::V1::Request::GetAllInstitutions.new(token)
+      institutions = []
+      response = request.get_all_institutions
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        institutions << parsed_response['institutions']
+        return institutions.flatten
+      else
+        raise_generic_error!(response)
       end
     end
 

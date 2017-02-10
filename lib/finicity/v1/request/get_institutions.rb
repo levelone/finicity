@@ -29,7 +29,8 @@ module Finicity::V1
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
-          'Finicity-App-Token' => token
+          'Finicity-App-Token' => token,
+          'Accept' => 'application/json'
         }
       end
 

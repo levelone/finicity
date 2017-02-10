@@ -1,27 +1,20 @@
 module Finicity::V1
   module Request
-    class GetInstitution
+    class GetAllInstitutions
       include ::Finicity::Logger
       extend ::HTTPClient::IncludeClient
+
       include_http_client do |client|
         client.cookie_manager = nil
       end
 
-      ##
-      # Attributes
-      #
-      attr_accessor :institution_id,
-        :token
+      attr_accessor :token
 
-      ##
-      # Instance Methods
-      #
-      def initialize(token, institution_id)
-        @institution_id = institution_id
+      def initialize(token)
         @token = token
       end
 
-      def get_institution
+      def get_all_institutions
         http_client.get(url, nil, headers)
       end
 
@@ -37,9 +30,7 @@ module Finicity::V1
         ::URI.join(
           ::Finicity.config.base_url,
           'v1/',
-          'institutions/',
-          "#{institution_id.to_s}/",
-          'details'
+          'institutions'
         )
       end
     end
