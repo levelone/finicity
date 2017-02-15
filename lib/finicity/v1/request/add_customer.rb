@@ -10,38 +10,37 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :token,
-        :user_guid, :user_email, :user_first_name, :user_last_name
+      attr_accessor :token, :username, :firstname, :lastname
 
       ##
       # Instance Methods
       #
-      def initialize(token, user_guid, user_email, user_first_name, user_last_name)
+      def initialize(token, username, firstname, lastname)
         @token = token
-        @user_guid       = user_guid
-        @user_email      = user_email
-        @user_first_name = user_first_name
-        @user_last_name  = user_last_name
+        @username = username
+        @firstname = firstname
+        @lastname = lastname
       end
 
       def add_customer
-        http_client.post(url, body, headers)
+        http_client.post(url_for_testing, body, headers)
       end
 
       def body
-        {
-          'username' => user_guid,
-          'email' => user_email,
-          'firstName' => user_first_name,
-          'lastName' => user_last_name,
-        }.to_xml(:root => 'customer')
+        customer = { 'username' => username }
+        if (firstname && lastname).present?
+          customer['firstName'] = firstname
+          customer['lastName'] = lastname
+        end
+        customer.to_json(:root => 'customer')
       end
 
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
-          'Content-Type' => 'application/xml'
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 
@@ -51,6 +50,15 @@ module Finicity::V1
           'v1/',
           'customers/',
           'active'
+        )
+      end
+
+      def url_for_testing
+        ::URI.join(
+          ::Finicity.config.base_url,
+          'v1/',
+          'customers/',
+          'testing'
         )
       end
     end

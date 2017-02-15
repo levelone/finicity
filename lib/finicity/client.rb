@@ -17,20 +17,19 @@ module Finicity
     # Instance Methods
     #
     # The accounts parameter is an array of Finicity::V1::Reponse::Account
-    def activate_accounts(customer_id, institution_id, accounts)
-      request = ::Finicity::V1::Request::ActivateAccounts.new(token, customer_id, institution_id, accounts)
-      request.log_request
-      response = request.activate_accounts
+    def add_accounts(customer_id, institution_id, credentials)
+      request = ::Finicity::V1::Request::AddAccounts.new(token, customer_id, institution_id, credentials)
+      response = request.add_accounts
       log_response(response)
 
       if response.status_code == 200
         @mfa_session = nil
-        parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
-        return parsed_response.accounts
+        parsed_response = JSON.parse(response.body)
+        parsed_response['accounts']
       elsif response.status_code == 203
         @mfa_session = response.headers["MFA-Session"]
-        parsed_response = ::Finicity::V1::Response::Mfa.parse(response.body)
-        return parsed_response.questions
+        parsed_response = JSON.parse(response.body)
+        parsed_response['questions']
       else
         raise_generic_error!(response)
       end
@@ -57,15 +56,15 @@ module Finicity
       end
     end
 
-    def add_customer(user_guid)
-      request = ::Finicity::V1::Request::AddCustomer.new(token, user_guid)
+    def add_customer(username, firstname = nil, lastname = nil)
+      request = ::Finicity::V1::Request::AddCustomer.new(token, username, firstname, lastname)
       request.log_request
       response = request.add_customer
       log_response(response)
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Customer.parse(response.body)
-        return parsed_response
+        parsed_response = JSON.parse(response.body)
+        parsed_response
       else
         raise_generic_error!(response)
       end
@@ -199,6 +198,20 @@ module Finicity
       end
     end
 
+    def get_customer_by_id(customer_id)
+      request = ::Finicity::V1::Request::GetCustomerById.new(token, customer_id)
+      request.log_request
+      response = request.get_customer_by_id
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        parsed_response
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     def get_customers
       request = ::Finicity::V1::Request::GetCustomers.new(token)
       start = 1
@@ -223,9 +236,9 @@ module Finicity
       end
     end
 
-    def get_institution(institution_id)
-      request = ::Finicity::V1::Request::GetInstitution.new(token, institution_id)
-      response = request.get_institution
+    def get_institution_by_id(institution_id)
+      request = ::Finicity::V1::Request::GetInstitutionById.new(token, institution_id)
+      response = request.get_institution_by_id
 
       if response.ok?
         parsed_response = JSON.parse(response.body)

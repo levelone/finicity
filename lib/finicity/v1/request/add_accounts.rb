@@ -1,6 +1,6 @@
 module Finicity::V1
   module Request
-    class GetInstitution
+    class AddAccounts
       include ::Finicity::Logger
       extend ::HTTPClient::IncludeClient
       include_http_client do |client|
@@ -10,25 +10,36 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :institution_id,
+      attr_accessor :credentials,
+        :customer_id,
+        :institution_id,
         :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, institution_id)
+      def initialize(token, customer_id, institution_id, credentials)
+        @credentials = credentials
+        @customer_id = customer_id
         @institution_id = institution_id
         @token = token
       end
 
-      def get_institution
-        http_client.get(url, nil, headers)
+      # The accounts parameter is the finicity representation of accounts
+      def add_accounts
+        http_client.post(url, body, headers)
+      end
+
+      # The accounts parameter is the finicity representation of accounts
+      def body
+        { 'credentials' => credentials }.to_json
       end
 
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
+          'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         }
       end
@@ -37,9 +48,12 @@ module Finicity::V1
         ::URI.join(
           ::Finicity.config.base_url,
           'v1/',
+          'customers/',
+          "#{customer_id}/",
           'institutions/',
-          "#{institution_id.to_s}/",
-          'details'
+          "#{institution_id}/",
+          'accounts/',
+          'addall'
         )
       end
     end
