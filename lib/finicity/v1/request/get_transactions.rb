@@ -10,17 +10,12 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :account_id,
-        :customer_id,
-        :from_date,
-        :to_date,
-        :token
+      attr_accessor :customer_id, :from_date, :to_date, :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, customer_id, account_id, from_date, to_date)
-        @account_id = account_id
+      def initialize(token, customer_id, from_date, to_date)
         @customer_id = customer_id
         @from_date = from_date
         @to_date = to_date
@@ -35,7 +30,8 @@ module Finicity::V1
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
-          'Content-Type' => 'application/xml'
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 
@@ -49,12 +45,9 @@ module Finicity::V1
           'v1/',
           'customers/',
           "#{customer_id}/",
-          'accounts/',
-          "#{account_id}/",
           'transactions'
         )
       end
-
     end
   end
 end

@@ -150,15 +150,15 @@ module Finicity
       end
     end
 
-    def get_accounts(customer_id, institution_id)
-      request = ::Finicity::V1::Request::GetAccounts.new(token, customer_id, institution_id)
+    def get_accounts(customer_id)
+      request = ::Finicity::V1::Request::GetAccounts.new(token, customer_id)
       request.log_request
       response = request.get_accounts
       log_response(response)
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
-        return parsed_response.accounts
+        parsed_response = JSON.parse(response.body)
+        parsed_response['accounts']
       elsif response.status_code == 404
         return []
       else
@@ -242,7 +242,7 @@ module Finicity
 
       if response.ok?
         parsed_response = JSON.parse(response.body)
-        return parsed_response
+        parsed_response
       else
         raise_generic_error!(response)
       end
@@ -280,7 +280,7 @@ module Finicity
       if response.ok?
         parsed_response = JSON.parse(response.body)
         institutions << parsed_response['institutions']
-        return institutions.flatten
+        institutions.flatten
       else
         raise_generic_error!(response)
       end
@@ -298,15 +298,15 @@ module Finicity
       end
     end
 
-    def get_transactions(customer_id, account_id, from_date, to_date)
-      request = ::Finicity::V1::Request::GetTransactions.new(token, customer_id, account_id, from_date, to_date)
+    def get_transactions(customer_id, from_date, to_date)
+      request = ::Finicity::V1::Request::GetTransactions.new(token, customer_id, from_date, to_date)
       request.log_request
       response = request.get_transactions
       log_response(response)
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Transactions.parse(response.body)
-        return parsed_response.transactions
+        parsed_response = JSON.parse(response.body)
+        parsed_response['transactions']
       else
         raise_generic_error!(response)
       end

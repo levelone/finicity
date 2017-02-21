@@ -10,16 +10,13 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :customer_id,
-        :institution_id,
-        :token
+      attr_accessor :customer_id, :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, customer_id, institution_id)
+      def initialize(token, customer_id)
         @customer_id = customer_id
-        @institution_id = institution_id
         @token = token
       end
 
@@ -30,7 +27,9 @@ module Finicity::V1
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
-          'Finicity-App-Token' => token
+          'Finicity-App-Token' => token,
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 
@@ -40,8 +39,6 @@ module Finicity::V1
           'v1/',
           'customers/',
           "#{customer_id}/",
-          'institutions/',
-          "#{institution_id}/",
           'accounts'
         )
       end
