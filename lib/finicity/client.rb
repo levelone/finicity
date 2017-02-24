@@ -365,6 +365,19 @@ module Finicity
       end
     end
 
+    def refresh_institution_accounts(customer_id, institution_login_id)
+      request = ::Finicity::V1::Request::RefreshInstitutionAccounts.new(token, customer_id, institution_login_id)
+      response = request.refresh_institution_accounts
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        parsed_response['accounts']
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     # The login_credentials parameter is an array of hashes with the keys :id, :name, :value
     def update_credentials(customer_id, account_id, login_credentials)
       request = ::Finicity::V1::Request::UpdateCredentials.new(token, customer_id, account_id, login_credentials)
