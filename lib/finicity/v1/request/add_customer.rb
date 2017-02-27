@@ -10,20 +10,22 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :token, :username, :firstname, :lastname
+      attr_accessor :token, :username, :firstname, :lastname, :is_test
 
       ##
       # Instance Methods
       #
-      def initialize(token, username, firstname, lastname)
+      def initialize(token, username, firstname, lastname, is_test)
         @token = token
         @username = username
         @firstname = firstname
         @lastname = lastname
+        @is_test = is_test
       end
 
       def add_customer
-        http_client.post(url_for_testing, body, headers)
+        request_url = is_test ? url_for_test : url
+        http_client.post(request_url, body, headers)
       end
 
       def body
@@ -53,7 +55,7 @@ module Finicity::V1
         )
       end
 
-      def url_for_testing
+      def url_for_test
         ::URI.join(
           ::Finicity.config.base_url,
           'v1/',

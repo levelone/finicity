@@ -10,18 +10,20 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :customer_id, :token
+      attr_accessor :customer_id, :institution_id, :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, customer_id)
+      def initialize(token, customer_id, institution_id)
         @customer_id = customer_id
+        @institution_id = institution_id
         @token = token
       end
 
       def get_accounts
-        http_client.get(url, nil, headers)
+        request_url = institution_id ? url_by_institution : url
+        http_client.get(request_url, nil, headers)
       end
 
       def headers
@@ -39,6 +41,18 @@ module Finicity::V1
           'v1/',
           'customers/',
           "#{customer_id}/",
+          'accounts'
+        )
+      end
+
+      def url_by_institution
+        ::URI.join(
+          ::Finicity.config.base_url,
+          'v1/',
+          'customers/',
+          "#{customer_id}/",
+          'institutions',
+          "#{institution_id}",
           'accounts'
         )
       end

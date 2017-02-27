@@ -10,15 +10,16 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :customer_id, :from_date, :to_date, :token
+      attr_accessor :customer_id, :from_date, :to_date, :pending, :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, customer_id, from_date, to_date)
+      def initialize(token, customer_id, from_date, to_date, pending)
         @customer_id = customer_id
         @from_date = from_date
         @to_date = to_date
+        @pending = pending
         @token = token
       end
 
@@ -36,7 +37,11 @@ module Finicity::V1
       end
 
       def query
-        { :fromDate => from_date, :toDate => to_date }
+        {
+          :fromDate => from_date,
+          :toDate => to_date,
+          :includePending => pending
+        }
       end
 
       def url

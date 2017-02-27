@@ -56,8 +56,8 @@ module Finicity
       end
     end
 
-    def add_customer(username, firstname = nil, lastname = nil)
-      request = ::Finicity::V1::Request::AddCustomer.new(token, username, firstname, lastname)
+    def add_customer(username, firstname = nil, lastname = nil, is_test=false)
+      request = ::Finicity::V1::Request::AddCustomer.new(token, username, firstname, lastname, is_test)
       request.log_request
       response = request.add_customer
       log_response(response)
@@ -150,8 +150,8 @@ module Finicity
       end
     end
 
-    def get_accounts(customer_id)
-      request = ::Finicity::V1::Request::GetAccounts.new(token, customer_id)
+    def get_accounts(customer_id, institution_id=nil)
+      request = ::Finicity::V1::Request::GetAccounts.new(token, customer_id, institution_id)
       request.log_request
       response = request.get_accounts
       log_response(response)
@@ -166,18 +166,18 @@ module Finicity
       end
     end
 
-    def get_customer_by_username(username)
-      request = ::Finicity::V1::Request::GetCustomersByUsername.new(token, username, 1, 1)
+    def get_customer_by_username(username, type='active')
+      request = ::Finicity::V1::Request::GetCustomersByUsername.new(token, username, type, 1, 1)
       request.log_request
       response = request.get_customers_by_username
       log_response(response)
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Customers.parse(response.body)
-        if parsed_response.found && parsed_response.found > 1
+        parsed_response = JSON.parse(response.body)
+        if parsed_response['found'] && parsed_response['found'] > 1
           raise ::Finicity::DuplicateCustomerError.new(username)
         else
-          return parsed_response.customers.first
+          parsed_response['customers'].first || {}
         end
       else
         raise_generic_error!(response)
@@ -298,8 +298,8 @@ module Finicity
       end
     end
 
-    def get_transactions(customer_id, from_date, to_date)
-      request = ::Finicity::V1::Request::GetTransactions.new(token, customer_id, from_date, to_date)
+    def get_transactions(customer_id, from_date, to_date, pending=true)
+      request = ::Finicity::V1::Request::GetTransactions.new(token, customer_id, from_date, to_date, pending)
       request.log_request
       response = request.get_transactions
       log_response(response)
