@@ -166,52 +166,6 @@ module Finicity
       end
     end
 
-    def get_customer_by_username(username, type='active')
-      request = ::Finicity::V1::Request::GetCustomersByUsername.new(token, username, type, 1, 1)
-      request.log_request
-      response = request.get_customers_by_username
-      log_response(response)
-
-      if response.ok?
-        parsed_response = JSON.parse(response.body)
-        if parsed_response['found'] && parsed_response['found'] > 1
-          raise ::Finicity::DuplicateCustomerError.new(username)
-        else
-          parsed_response['customers'].first || {}
-        end
-      else
-        raise_generic_error!(response)
-      end
-    end
-
-    def get_customers_by_username(username, start, limit)
-      request = ::Finicity::V1::Request::GetCustomersByUsername.new(token, username, start, limit)
-      request.log_request
-      response = request.get_customers_by_username
-      log_response(response)
-
-      if response.ok?
-        parsed_response = ::Finicity::V1::Response::Customers.parse(response.body)
-        return parsed_response.customers
-      else
-        raise_generic_error!(response)
-      end
-    end
-
-    def get_customer_by_id(customer_id)
-      request = ::Finicity::V1::Request::GetCustomerById.new(token, customer_id)
-      request.log_request
-      response = request.get_customer_by_id
-      log_response(response)
-
-      if response.ok?
-        parsed_response = JSON.parse(response.body)
-        parsed_response
-      else
-        raise_generic_error!(response)
-      end
-    end
-
     def get_customers
       request = ::Finicity::V1::Request::GetCustomers.new(token)
       start = 1
@@ -233,6 +187,44 @@ module Finicity
         else
           raise_generic_error!(response)
         end
+      end
+    end
+
+    def get_customer_account_statement(customer_id, account_id)
+      request = ::Finicity::V1::Request::GetCustomerAccountStatement.new(token, customer_id, account_id)
+      request.log_request
+      response = request.get_customer_account_statement
+    end
+
+    def get_customer_by_id(customer_id)
+      request = ::Finicity::V1::Request::GetCustomerById.new(token, customer_id)
+      request.log_request
+      response = request.get_customer_by_id
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        parsed_response
+      else
+        raise_generic_error!(response)
+      end
+    end
+
+    def get_customer_by_username(username, type='active')
+      request = ::Finicity::V1::Request::GetCustomersByUsername.new(token, username, type, 1, 1)
+      request.log_request
+      response = request.get_customers_by_username
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        if parsed_response['found'] && parsed_response['found'] > 1
+          raise ::Finicity::DuplicateCustomerError.new(username)
+        else
+          parsed_response['customers'].first || {}
+        end
+      else
+        raise_generic_error!(response)
       end
     end
 
@@ -299,7 +291,7 @@ module Finicity
     end
 
     def get_transactions(customer_id, from_date, to_date, pending=true)
-      request = ::Finicity::V1::Request::GetTransactions.new(token, customer_id, from_date, to_date, pending)
+      request = ::Finicity::V3::Request::GetTransactions.new(token, customer_id, from_date, to_date, pending)
       request.log_request
       response = request.get_transactions
       log_response(response)

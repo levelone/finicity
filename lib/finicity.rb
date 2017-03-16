@@ -13,6 +13,7 @@ require 'finicity/logger'
 
 require 'finicity/v1'
 require 'finicity/v2'
+require 'finicity/v3'
 
 module Finicity
   ##
