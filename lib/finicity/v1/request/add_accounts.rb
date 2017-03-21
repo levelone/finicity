@@ -10,7 +10,7 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :credentials,
+      attr_accessor :login_credentials,
         :customer_id,
         :institution_id,
         :token
@@ -18,10 +18,10 @@ module Finicity::V1
       ##
       # Instance Methods
       #
-      def initialize(token, customer_id, institution_id, credentials)
-        @credentials = credentials
+      def initialize(token, customer_id, institution_id, login_credentials)
         @customer_id = customer_id
         @institution_id = institution_id
+        @login_credentials = login_credentials
         @token = token
       end
 
@@ -32,7 +32,7 @@ module Finicity::V1
 
       # The accounts parameter is the finicity representation of accounts
       def body
-        { 'credentials' => credentials }.to_json
+        { 'credentials' => login_credentials }.to_json
       end
 
       def headers

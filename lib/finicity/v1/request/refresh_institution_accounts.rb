@@ -31,6 +31,7 @@ module Finicity::V1
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
+          'Content-Length' => 0,
           'Content-Type' => 'application/json',
           'Accept' => 'application/json'
         }

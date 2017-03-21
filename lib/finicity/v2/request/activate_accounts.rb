@@ -1,6 +1,6 @@
-module Finicity::V1
+module Finicity::V2
   module Request
-    class AddAccountsWithMfa
+    class ActivateAccounts
       include ::Finicity::Logger
       extend ::HTTPClient::IncludeClient
       include_http_client do |client|
@@ -10,31 +10,28 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :token, :customer_id, :institution_id, :mfa_session, :mfa_credentials
+      attr_accessor :accounts,
+        :customer_id,
+        :institution_id,
+        :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, mfa_session, customer_id, institution_id, mfa_credentials=[])
+      def initialize(token, customer_id, institution_id, accounts=[])
+        @accounts = accounts
         @customer_id = customer_id
         @institution_id = institution_id
-        @mfa_credentials = mfa_credentials
-        @mfa_session = mfa_session
         @token = token
       end
 
-      # The accounts parameter is the finicity representation of accounts
-      def add_accounts_with_mfa
-        http_client.post(url, body, headers)
+      def activate_accounts
+        http_client.put(url, body, headers)
       end
 
       # The accounts parameter is the finicity representation of accounts
       def body
-        {
-          'mfaChallenges' => {
-            'questions' => mfa_credentials
-          }
-        }.to_json
+        { 'accounts' => accounts }.to_json
       end
 
       def headers
@@ -42,24 +39,22 @@ module Finicity::V1
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
           'Content-Type' => 'application/json',
-          'Accept' => 'application/json',
-          'MFA-Session' => mfa_session
+          'Accept' => 'application/json'
         }
       end
 
       def url
         ::URI.join(
           ::Finicity.config.base_url,
-          'v1/',
+          'v2/',
           'customers/',
           "#{customer_id}/",
           'institutions/',
           "#{institution_id}/",
-          'accounts/',
-          'addall/',
-          'mfa'
+          'accounts',
         )
       end
+
     end
   end
 end

@@ -1,6 +1,6 @@
 module Finicity::V1
   module Request
-    class AddAccountsWithMfa
+    class RefreshInstitutionAccountsWithMfa
       include ::Finicity::Logger
       extend ::HTTPClient::IncludeClient
       include_http_client do |client|
@@ -10,31 +10,30 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :token, :customer_id, :institution_id, :mfa_session, :mfa_credentials
+      attr_accessor :customer_id,
+        :institution_login_id,
+        :mfa_credentials,
+        :mfa_session,
+        :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, mfa_session, customer_id, institution_id, mfa_credentials=[])
+      def initialize(token, mfa_session, customer_id, institution_login_id, mfa_credentials)
         @customer_id = customer_id
-        @institution_id = institution_id
+        @institution_login_id = institution_login_id
         @mfa_credentials = mfa_credentials
         @mfa_session = mfa_session
         @token = token
       end
 
       # The accounts parameter is the finicity representation of accounts
-      def add_accounts_with_mfa
+      def refresh_institution_accounts_with_mfa
         http_client.post(url, body, headers)
       end
 
-      # The accounts parameter is the finicity representation of accounts
       def body
-        {
-          'mfaChallenges' => {
-            'questions' => mfa_credentials
-          }
-        }.to_json
+        { 'questions' => mfa_credentials }.to_json
       end
 
       def headers
@@ -53,10 +52,9 @@ module Finicity::V1
           'v1/',
           'customers/',
           "#{customer_id}/",
-          'institutions/',
-          "#{institution_id}/",
+          'institutionLogins/',
+          "#{institution_login_id}/",
           'accounts/',
-          'addall/',
           'mfa'
         )
       end

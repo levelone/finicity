@@ -30,28 +30,15 @@ module Finicity::V1
       end
 
       def body
-        builder = ::Nokogiri::XML::Builder.new do |xml|
-          xml.accounts {
-            xml.credentials {
-              login_credentials.each do |login_credential|
-                xml.loginField {
-                  xml.id(login_credential[:id])
-                  xml.name(login_credential[:name])
-                  xml.value(login_credential[:value])
-                }
-              end
-            }
-          }
-        end
-
-        builder.to_xml
+        { 'credentials' => login_credentials }.to_json
       end
 
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
-          'Content-Type' => 'application/xml'
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 
