@@ -10,16 +10,16 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :token, :customer_id, :institution_id, :mfa_session, :mfa_credentials
+      attr_accessor :token, :customer_id, :institution_id, :mfa_session_id, :mfa_credentials
 
       ##
       # Instance Methods
       #
-      def initialize(token, mfa_session, customer_id, institution_id, mfa_credentials=[])
+      def initialize(token, mfa_session_id, customer_id, institution_id, mfa_credentials=[])
         @customer_id = customer_id
         @institution_id = institution_id
         @mfa_credentials = mfa_credentials
-        @mfa_session = mfa_session
+        @mfa_session_id = mfa_session_id
         @token = token
       end
 
@@ -43,7 +43,7 @@ module Finicity::V1
           'Finicity-App-Token' => token,
           'Content-Type' => 'application/json',
           'Accept' => 'application/json',
-          'MFA-Session' => mfa_session
+          'MFA-Session' => mfa_session_id
         }
       end
 

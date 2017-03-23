@@ -42,18 +42,20 @@ module Finicity
       '187' => 'Incorrect answer to MFA challenge question.'
     }
 
-    attr_reader :aggregation_status_code
+    attr_reader :finicity_code, :http_status
 
-    def initialize(aggregation_status_code)
-      @aggregation_status_code = aggregation_status_code
+    def initialize(finicity_code, http_status = nil)
+      @finicity_code = finicity_code
+      @http_status = http_status
     end
 
     def error_message
-      ERROR_CODE_MAP[aggregation_status_code.to_s] || 'Unknown Error'
+      ERROR_CODE_MAP[finicity_code.to_s] || 'Unknown Error'
     end
 
     def to_s
-      "[Aggregation Status Code #{aggregation_status_code}] #{error_message}"
+      status = http_status.nil? ? "" : "[Status #{http_status}] "
+      status + "[Aggregation Status Code #{finicity_code}] #{error_message}"
     end
   end
 

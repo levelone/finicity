@@ -14,18 +14,18 @@ module Finicity::V1
         :customer_id,
         :institution_id,
         :mfa_credentials,
-        :mfa_session,
+        :mfa_session_id,
         :token
 
       ##
       # Instance Methods
       #
-      def initialize(token, mfa_session, customer_id, institution_id, accounts, mfa_credentials)
+      def initialize(token, mfa_session_id, customer_id, institution_id, accounts, mfa_credentials)
         @accounts = accounts
         @customer_id = customer_id
         @institution_id = institution_id
         @mfa_credentials = mfa_credentials
-        @mfa_session = mfa_session
+        @mfa_session_id = mfa_session_id
         @token = token
       end
 
@@ -66,7 +66,7 @@ module Finicity::V1
           'Finicity-App-Key' => ::Finicity.config.app_key,
           'Finicity-App-Token' => token,
           'Content-Type' => 'application/xml',
-          'MFA-Session' => mfa_session,
+          'MFA-Session' => mfa_session_id,
         }
       end
 

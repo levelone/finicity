@@ -3,14 +3,19 @@ module Finicity
     ##
     # Attributes
     #
-    attr_accessor :mfa_session, :token
+    attr_accessor :mfa_session_id, :mfa_session_type, :token
 
+    MFA_SESSION_TYPE = {
+      discover: 'discover',
+      refresh: 'refresh'
+    }.freeze
     ##
     # Constructor
     #
-    def initialize(token = nil, mfa_session = nil)
+    def initialize(token = nil, mfa_session_id = nil, mfa_session_type = nil)
       @token = token
-      @mfa_session = mfa_session
+      @mfa_session_id = mfa_session_id
+      @mfa_session_type = mfa_session_type
     end
 
     ##
@@ -23,11 +28,11 @@ module Finicity
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers['MFA-Session']
+        @mfa_session_id = response.headers['MFA-Session']
         parsed_response = JSON.parse(response.body)
         parsed_response['mfa-session'] = response.headers['MFA-Session']
         parsed_response
@@ -37,16 +42,16 @@ module Finicity
     end
 
     def add_accounts_with_mfa(customer_id, institution_id, mfa_credentials)
-      request = ::Finicity::V1::Request::AddAccountsWithMfa.new(token, mfa_session, customer_id, institution_id, mfa_credentials)
+      request = ::Finicity::V1::Request::AddAccountsWithMfa.new(token, mfa_session_id, customer_id, institution_id, mfa_credentials)
       response = request.add_accounts_with_mfa
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers['MFA-Session']
+        @mfa_session_id = response.headers['MFA-Session']
         parsed_response = JSON.parse(response.body)
         parsed_response['mfa-session'] = response.headers['MFA-Session']
         parsed_response
@@ -62,7 +67,7 @@ module Finicity
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       else
@@ -73,17 +78,17 @@ module Finicity
     # The accounts parameter is an array of Finicity::V1::Reponse::Account
     # The mfa_credentials parameter is an array of hashes with keys :text, :answer
     def activate_accounts_with_mfa(customer_id, institution_id, accounts, mfa_credentials)
-      request = ::Finicity::V1::Request::ActivateAccountsWithMfa.new(token, mfa_session, customer_id, institution_id, accounts, mfa_credentials)
+      request = ::Finicity::V1::Request::ActivateAccountsWithMfa.new(token, mfa_session_id, customer_id, institution_id, accounts, mfa_credentials)
       request.log_request
       response = request.activate_accounts_with_mfa
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
         return parsed_response.accounts
       elsif response.status_code == 203
-        @mfa_session = response.headers['MFA-Session']
+        @mfa_session_id = response.headers['MFA-Session']
         parsed_response = ::Finicity::V1::Response::Mfa.parse(response.body)
         return parsed_response.questions
       else
@@ -152,13 +157,16 @@ module Finicity
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
+        @mfa_session_type = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers['MFA-Session']
+        @mfa_session_id = response.headers['MFA-Session']
+        @mfa_session_type = MFA_SESSION_TYPE[:discover]
         parsed_response = JSON.parse(response.body)
-        parsed_response['mfa-session'] = response.headers['MFA-Session']
+        parsed_response['mfa-session-id'] = response.headers['MFA-Session']
+        parsed_response['mfa-session-type'] = MFA_SESSION_TYPE[:discover]
         parsed_response
       else
         raise_generic_error!(response)
@@ -168,20 +176,38 @@ module Finicity
     # The login_credentials parameter is an array of hashes with the keys :id, :name, :value
     # The mfa_credentials parameter is an array of hashes with keys :text, :answer
     def discover_accounts_with_mfa(customer_id, institution_id, mfa_credentials)
-      request = ::Finicity::V1::Request::DiscoverAccountsWithMfa.new(token, mfa_session, customer_id, institution_id, mfa_credentials)
+      request = ::Finicity::V1::Request::DiscoverAccountsWithMfa.new(token, mfa_session_id, customer_id, institution_id, mfa_credentials)
       request.log_request
       response = request.discover_accounts_with_mfa
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
+        @mfa_session_type = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers['MFA-Session']
+        @mfa_session_id = response.headers['MFA-Session']
+        @mfa_session_type = MFA_SESSION_TYPE[:discover]
         parsed_response = JSON.parse(response.body)
-        parsed_response['mfa-session'] = response.headers['Mfa-Session']
+        parsed_response['mfa-session-id'] = response.headers['MFA-Session']
+        parsed_response['mfa-session-type'] = MFA_SESSION_TYPE[:discover]
         parsed_response
+      else
+        raise_generic_error!(response)
+      end
+    end
+
+    def get_account(customer_id, account_id)
+      request = ::Finicity::V1::Request::GetAccount.new(token, customer_id, account_id)
+      request.log_request
+      response = request.get_account
+      log_response(response)
+
+      if response.ok?
+        JSON.parse(response.body)
+      elsif response.status_code == 404
+        return []
       else
         raise_generic_error!(response)
       end
@@ -231,6 +257,14 @@ module Finicity
       request = ::Finicity::V1::Request::GetCustomerAccountStatement.new(token, customer_id, account_id)
       request.log_request
       response = request.get_customer_account_statement
+
+      if response.status_code == 200
+        response
+      elsif response.status_code == 203
+        JSON.parse(response.body)
+      else
+        raise_generic_error!(response)
+      end
     end
 
     def get_customer_by_id(customer_id)
@@ -348,11 +382,11 @@ module Finicity
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
         return parsed_response.accounts
       elsif response.status_code == 203
-        @mfa_session = response.headers["MFA-Session"]
+        @mfa_session_id = response.headers["MFA-Session"]
         parsed_response = ::Finicity::V1::Response::Mfa.parse(response.body)
         return parsed_response.questions
       else
@@ -362,17 +396,17 @@ module Finicity
 
     # The mfa_credentials parameter is an array of hashes with keys :text, :answer
     def interactive_refresh_account_with_mfa(customer_id, account_id, mfa_credentials)
-      request = ::Finicity::V1::Request::InteractiveRefreshAccountWithMfa.new(token, mfa_session, customer_id, account_id, mfa_credentials)
+      request = ::Finicity::V1::Request::InteractiveRefreshAccountWithMfa.new(token, mfa_session_id, customer_id, account_id, mfa_credentials)
       request.log_request
       response = request.interactive_refresh_account_with_mfa
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
         parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
         return parsed_response.accounts
       elsif response.status_code == 203
-        @mfa_session = response.headers["MFA-Session"]
+        @mfa_session_id = response.headers["MFA-Session"]
         parsed_response = ::Finicity::V1::Response::Mfa.parse(response.body)
         return parsed_response.questions
       else
@@ -400,13 +434,16 @@ module Finicity
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
+        @mfa_session_type = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers["MFA-Session"]
+        @mfa_session_id = response.headers["MFA-Session"]
+        @mfa_session_type = MFA_SESSION_TYPE[:refresh]
         parsed_response = JSON.parse(response.body)
-        parsed_response['mfa-session'] = response.headers["MFA-Session"]
+        parsed_response['mfa-session-id'] = response.headers['MFA-Session']
+        parsed_response['mfa-session-type'] = MFA_SESSION_TYPE[:refresh]
         parsed_response
       else
         raise_generic_error!(response)
@@ -414,18 +451,21 @@ module Finicity
     end
 
     def refresh_institution_accounts_with_mfa(customer_id, institution_login_id, mfa_credentials)
-      request = ::Finicity::V1::Request::RefreshInstitutionAccountsWithMfa.new(token, mfa_session, customer_id, institution_login_id, mfa_credentials)
+      request = ::Finicity::V1::Request::RefreshInstitutionAccountsWithMfa.new(token, mfa_session_id, customer_id, institution_login_id, mfa_credentials)
       response = request.refresh_institution_accounts_with_mfa
       log_response(response)
 
       if response.status_code == 200
-        @mfa_session = nil
+        @mfa_session_id = nil
+        @mfa_session_type = nil
         parsed_response = JSON.parse(response.body)
         parsed_response['accounts']
       elsif response.status_code == 203
-        @mfa_session = response.headers["MFA-Session"]
+        @mfa_session_id = response.headers["MFA-Session"]
+        @mfa_session_type = MFA_SESSION_TYPE[:refresh]
         parsed_response = JSON.parse(response.body)
-        parsed_response['mfa-session'] = response.headers["MFA-Session"]
+        parsed_response['mfa-session-id'] = response.headers['MFA-Session']
+        parsed_response['mfa-session-type'] = MFA_SESSION_TYPE[:refresh]
         parsed_response
       else
         raise_generic_error!(response)
@@ -467,7 +507,6 @@ module Finicity
         error = JSON.parse(response.body)
         error_message = error['message']
         error_code = error['code']
-        error
       else
         error_message = response.body
         error_code = nil
@@ -476,7 +515,7 @@ module Finicity
       # Finicity API uses 500 status code, with a 103 code in the body to communicate
       # that the credentials are invalid.
       if response.status_code == 500 && error_code == 103
-        fail ::Finicity::InvalidCredentialsError.new(103)
+        fail ::Finicity::InvalidCredentialsError.new(103, response.status_code)
       else
         fail ::Finicity::GenericError.new(error_message, response.status_code, error_code)
       end
