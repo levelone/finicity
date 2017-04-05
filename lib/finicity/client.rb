@@ -256,15 +256,7 @@ module Finicity
     def get_customer_account_statement(customer_id, account_id)
       request = ::Finicity::V1::Request::GetCustomerAccountStatement.new(token, customer_id, account_id)
       request.log_request
-      response = request.get_customer_account_statement
-
-      if response.status_code == 200
-        response
-      elsif response.status_code == 203
-        JSON.parse(response.body)
-      else
-        raise_generic_error!(response)
-      end
+      request.get_customer_account_statement
     end
 
     def get_customer_by_id(customer_id)
