@@ -115,8 +115,8 @@ module Finicity
       response = request.authenticate
 
       if response.ok?
-        parsed_response = ::Finicity::V2::Response::PartnerAuthentication.parse(response.body)
-        @token = parsed_response.token
+        parsed_response = JSON.parse(response.body)
+        @token = parsed_response['token']
         parsed_response
       else
         fail ::Finicity::AuthenticationError.new(response.body, response.status_code)
@@ -348,6 +348,20 @@ module Finicity
       if response.ok?
         parsed_response = ::Finicity::V1::Response::LoginForm.parse(response.body)
         return parsed_response.login_fields
+      else
+        raise_generic_error!(response)
+      end
+    end
+
+    def get_account_transactions(customer_id, account_id, from_date, to_date, pending=true)
+      request = ::Finicity::V3::Request::GetAccountTransactions.new(token, customer_id, account_id, from_date, to_date, pending)
+      request.log_request
+      response = request.get_account_transactions
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        parsed_response['transactions']
       else
         raise_generic_error!(response)
       end

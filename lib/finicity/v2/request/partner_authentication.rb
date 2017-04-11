@@ -14,20 +14,17 @@ module Finicity::V2
       end
 
       def body
-        builder = ::Nokogiri::XML::Builder.new do |xml|
-          xml.credentials do
-            xml.partnerId(::Finicity.config.partner_id)
-            xml.partnerSecret(::Finicity.config.partner_secret)
-          end
-        end
-
-        builder.doc.root.to_s
+        {
+          'partnerId' => ::Finicity.config.partner_id,
+          'partnerSecret' => ::Finicity.config.partner_secret
+        }.to_json
       end
 
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
-          'Content-Type' => 'application/xml'
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
         }
       end
 

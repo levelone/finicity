@@ -51,8 +51,8 @@ module Finicity::V1
           'v1/',
           'customers/',
           "#{customer_id}/",
-          'institutions',
-          "#{institution_id}",
+          'institutions/',
+          "#{institution_id}/",
           'accounts'
         )
       end

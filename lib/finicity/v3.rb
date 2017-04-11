@@ -1,3 +1,4 @@
+require 'finicity/v3/request/get_account_transactions'
 require 'finicity/v3/request/get_transactions'
 require 'finicity/v3/response/transactions'
 
