@@ -427,8 +427,8 @@ module Finicity
       log_response(response)
 
       if response.ok?
-        parsed_response = ::Finicity::V1::Response::Accounts.parse(response.body)
-        return parsed_response.accounts
+        parsed_response = JSON.parse(response.body)
+        parsed_response['accounts']
       else
         raise_generic_error!(response)
       end

@@ -10,8 +10,7 @@ module Finicity::V1
       ##
       # Attributes
       #
-      attr_accessor :customer_id,
-        :token
+      attr_accessor :customer_id, :token
 
       ##
       # Instance Methods
@@ -22,13 +21,16 @@ module Finicity::V1
       end
 
       def refresh_accounts
-        http_client.post(url, nil, headers)
+        body = {}
+        http_client.post(url, body, headers)
       end
 
       def headers
         {
           'Finicity-App-Key' => ::Finicity.config.app_key,
-          'Finicity-App-Token' => token
+          'Finicity-App-Token' => token,
+          'Content-Length' => 0,
+          'Accept' => 'application/json'
         }
       end
 
@@ -41,7 +43,6 @@ module Finicity::V1
           'accounts'
         )
       end
-
     end
   end
 end
