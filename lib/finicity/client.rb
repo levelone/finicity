@@ -496,7 +496,7 @@ module Finicity
     private
 
     def log_response(response)
-      ::Finicity.logger.debug do
+      ::Finicity.logger.info do
         log = "RESPONSE"
         log << "\n  STATUS CODE: #{response.status_code}"
         log << "\n  BODY: #{response.body}"

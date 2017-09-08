@@ -1,7 +1,7 @@
 module Finicity
   module Logger
     def log_request
-      ::Finicity.logger.debug do
+      ::Finicity.logger.info do
         log = "REQUEST: #{self.class.name}"
         log << "\n  URL: #{url}" if self.respond_to?(:url)
         log << "\n  QUERY: #{query}" if self.respond_to?(:query)
