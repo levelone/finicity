@@ -303,6 +303,22 @@ module Finicity
       end
     end
 
+    def get_institution_login_accounts(customer_id, institution_login_id)
+      request = ::Finicity::V1::Request::GetInstitutionLoginAccounts.new(token, customer_id, institution_login_id)
+      request.log_request
+      response = request.get_accounts
+      log_response(response)
+
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+        parsed_response['accounts']
+      elsif response.status_code == 404
+        return []
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     def get_institutions(institution_name)
       request = ::Finicity::V1::Request::GetInstitutions.new(token, institution_name)
       start = 1
