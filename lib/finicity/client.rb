@@ -436,6 +436,22 @@ module Finicity
       end
     end
 
+    # The login_credentials parameter is an array of hashes with the keys :id, :name, :value
+    def modify_institution_login_credentials(customer_id, institution_login_id, credentials)
+      request = ::Finicity::V1::Request::ModifyInstitutionLoginCredentials.new(
+        token, customer_id, institution_login_id, credentials
+      )
+      request.log_request
+      response = request.modify_credentials
+      log_response(response)
+
+      if response.status_code == 204
+        'OK'
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     def refresh_accounts(customer_id)
       request = ::Finicity::V1::Request::RefreshAccounts.new(token, customer_id)
       request.log_request
