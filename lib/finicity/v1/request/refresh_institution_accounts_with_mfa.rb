@@ -4,6 +4,7 @@ module Finicity::V1
       include ::Finicity::Logger
       extend ::HTTPClient::IncludeClient
       include_http_client do |client|
+        client.receive_timeout = 180
         client.cookie_manager = nil
       end
 
