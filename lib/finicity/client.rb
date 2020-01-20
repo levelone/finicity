@@ -356,16 +356,26 @@ module Finicity
     end
 
     def get_all_institutions
-      request = ::Finicity::V1::Request::GetAllInstitutions.new(token)
+      request = ::Finicity::V2::Request::GetAllInstitutions.new(token)
+      start = 1
+      limit = 1000
       institutions = []
-      response = request.get_all_institutions
 
-      if response.ok?
-        parsed_response = JSON.parse(response.body)
-        institutions << parsed_response['institutions']
-        institutions.flatten
-      else
-        raise_generic_error!(response)
+      loop do
+        response = request.get_all_institutions(start, limit)
+
+        if response.ok?
+          parsed_response = JSON.parse(response.body)
+          institutions << parsed_response['institutions']
+
+          if parsed_response['moreAvailable']
+            start += 1
+          else
+            return institutions.flatten
+          end
+        else
+          raise_generic_error!(response)
+        end
       end
     end
 
