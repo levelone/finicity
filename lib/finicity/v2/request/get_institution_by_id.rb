@@ -1,4 +1,4 @@
-module Finicity::V1
+module Finicity::V2
   module Request
     class GetInstitutionById
       include ::Finicity::Logger
@@ -21,8 +21,7 @@ module Finicity::V1
       end
 
       def get_institution_by_id
-        query = nil
-        http_client.get(url, query, headers)
+        http_client.get(url, nil, headers)
       end
 
       def headers
@@ -37,11 +36,10 @@ module Finicity::V1
       def url
         ::URI.join(
           ::Finicity.config.base_url,
-          'aggregation/',
-          'v1/',
+          'institution/',
+          'v2/',
           'institutions/',
-          "#{institution_id}/",
-          'details'
+          "#{institution_id}/"
         )
       end
     end

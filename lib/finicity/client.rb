@@ -304,7 +304,7 @@ module Finicity
     end
 
     def get_institution_by_id(institution_id)
-      request = ::Finicity::V1::Request::GetInstitutionById.new(token, institution_id)
+      request = ::Finicity::V2::Request::GetInstitutionById.new(token, institution_id)
       response = request.get_institution_by_id
 
       if response.ok?
