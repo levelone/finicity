@@ -40,8 +40,7 @@ module Finicity::V1
           'aggregation/',
           'v1/',
           'institutions/',
-          "#{institution_id}/",
-          'details'
+          "#{institution_id}/"
         )
       end
     end
