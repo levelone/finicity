@@ -7,12 +7,14 @@ module Finicity::V1
         client.cookie_manager = nil
       end
 
-      attr_accessor :customer_id, :token, :redirect_uri
+      attr_accessor :customer_id, :token, :redirect_uri, :oauth_support, :autoreplace
 
-      def initialize(token, customer_id, redirect_uri)
+      def initialize(token, customer_id, redirect_uri, oauth_support, autoreplace)
         @customer_id = customer_id
         @token = token
         @redirect_uri = redirect_uri
+        @oauth_support = oauth_support
+        @autoreplace = autoreplace
       end
 
       def generate_link
@@ -25,6 +27,10 @@ module Finicity::V1
         data['customerId'] = "#{customer_id}"
         data['redirectUri'] = redirect_uri
         data['type'] = 'aggregation'
+        data['oauthOptions'] = {
+          'enabled' => oauth_support,
+          'autoReplace' => autoreplace
+        }
         data.to_json(:root => 'data')
       end
 
