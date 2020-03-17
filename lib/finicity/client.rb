@@ -110,8 +110,8 @@ module Finicity
       end
     end
 
-    def generate_finicity_connect_link(customer_id, redirect_uri, oauth_support = true, autoreplace = true)
-      request = ::Finicity::V1::Request::GenerateFinicityConnectLink.new(token, customer_id, redirect_uri, oauth_support, autoreplace)
+    def generate_finicity_connect_link(customer_id, redirect_uri, oauth_support = true, autoreplace = true, institutions = {})
+      request = ::Finicity::V1::Request::GenerateFinicityConnectLink.new(token, customer_id, redirect_uri, oauth_support, autoreplace, institutions)
       request.log_request
       response = request.generate_link
       log_response(response)
