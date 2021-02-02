@@ -96,8 +96,8 @@ module Finicity
       end
     end
 
-    def add_customer(username, firstname = nil, lastname = nil, is_test=false)
-      request = ::Finicity::V1::Request::AddCustomer.new(token, username, firstname, lastname, is_test)
+    def add_customer(username, firstname = nil, lastname = nil, is_test = false, applicationid = nil)
+      request = ::Finicity::V2::Request::AddCustomer.new(token, username, firstname, lastname, applicationid, is_test)
       request.log_request
       response = request.add_customer
       log_response(response)
@@ -110,8 +110,8 @@ module Finicity
       end
     end
 
-    def generate_finicity_connect_link(customer_id, redirect_uri, oauth_support = true, autoreplace = true, institutions = {})
-      request = ::Finicity::V1::Request::GenerateFinicityConnectLink.new(token, customer_id, redirect_uri, oauth_support, autoreplace, institutions)
+    def generate_finicity_connect_link(customer_id, redirect_uri, experience = nil)
+      request = ::Finicity::V2::Request::GenerateFinicityConnectLink.new(token, customer_id, redirect_uri, experience)
       request.log_request
       response = request.generate_link
       log_response(response)

@@ -113,7 +113,7 @@ describe ::Finicity::Client do
   describe "#add_customer" do
     context "when the response is successful" do
       it "returns the parsed response" do
-        allow_any_instance_of(::Finicity::V1::Request::AddCustomer).to(
+        allow_any_instance_of(::Finicity::V2::Request::AddCustomer).to(
           receive(:add_customer).and_return(response)
         )
         response = subject.add_customer('USR-123')
@@ -123,7 +123,7 @@ describe ::Finicity::Client do
 
     context "when the response is an error" do
       it "fails" do
-        allow_any_instance_of(::Finicity::V1::Request::AddCustomer).to(
+        allow_any_instance_of(::Finicity::V2::Request::AddCustomer).to(
           receive(:add_customer).and_return(error)
         )
         expect { subject.add_customer('USR-123') }.to raise_error(::Finicity::GenericError)
