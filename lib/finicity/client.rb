@@ -122,6 +122,18 @@ module Finicity
       end
     end
 
+    def generate_finicity_fix_connect_link(customer_id, institution_login_id = nil, experience = nil)
+      request = ::Finicity::V2::Request::GenerateFinicityFixConnectLink.new(token, customer_id, institution_login_id, experience)
+      request.log_request
+      response = request.generate_link
+      log_response(response)
+      if response.ok?
+        parsed_response = JSON.parse(response.body)
+      else
+        raise_generic_error!(response)
+      end
+    end
+
     def authenticate!
       request = ::Finicity::V2::Request::PartnerAuthentication.new
       response = request.authenticate
